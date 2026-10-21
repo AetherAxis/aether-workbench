@@ -1,0 +1,10 @@
+<Project>
+  <!-- 引擎零业务依赖纪律：仅 UI 平台包（Avalonia/图标/富文本）+ MVVM 工具 + DI。出现业务包即违规。 -->
+  <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="12.1.1" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.1" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+    <PackageVersion Include="IconPacks.Avalonia.Codicons" Version="2.0.0" />
+  </ItemGroup>
+</Project>

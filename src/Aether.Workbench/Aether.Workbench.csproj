@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyName>Aether.Workbench</AssemblyName>
+    <RootNamespace>Aether.Workbench</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="IconPacks.Avalonia.Codicons" />
+  </ItemGroup>
+
+  <!-- 内置主题 JSON（ThemeLoader 按 avares://Aether.Workbench/Assets/{name}.json 读取）——
+       Avalonia SDK 只自动纳入 .axaml，.json 须显式 AvaloniaResource。 -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/*.json" />
+  </ItemGroup>
+
+</Project>

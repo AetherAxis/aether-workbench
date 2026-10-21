@@ -1,0 +1,182 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wb="using:Aether.Workbench"
+        xmlns:abstractions="using:Aether.Workbench.Abstractions"
+        x:Class="Aether.Workbench.WorkbenchWindow"
+        Title="Aether Workbench"
+        Width="1280" Height="820"
+        MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WorkspaceBackground}"
+        FontFamily="{DynamicResource UiFont}">
+
+  <!-- shell chrome 样式（nav-rail/win-btn/mac-tl/split-* 等）——Styles 根的样式集，挂 Window.Styles -->
+  <Window.Styles>
+    <StyleInclude Source="avares://Aether.Workbench/Themes/SharedTheme.axaml"/>
+  </Window.Styles>
+
+  <!-- IWorkspace → WorkspaceView：主区 ContentControl 绑 ActiveWorkspace 经此解析（引擎自包含） -->
+  <Window.DataTemplates>
+    <DataTemplate DataType="{x:Type abstractions:IWorkspace}">
+      <wb:WorkspaceView/>
+    </DataTemplate>
+  </Window.DataTemplates>
+
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- 设计 token 基线层（字体/圆角/间距/背景）。内置 light/dark/dream 均为 JSON overlay 经 ThemeLoader 叠加覆盖颜色 token。 -->
+        <ResourceInclude Source="avares://Aether.Workbench/Themes/WorkbenchTheme.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Grid>
+    <!-- Layer 0: 动画梦幻背景层（皮肤 animated=true 时显，aurora 漂移光斑；半透明面板让 aurora 透出） -->
+    <Grid x:Name="DreamLayer" IsHitTestVisible="False" IsVisible="{Binding IsDreamLayerVisible}" ClipToBounds="True"/>
+
+    <!-- Layer 1: shell（nav rail + 工作台）—— DreamLayer 在其下层 -->
+    <DockPanel>
+
+    <!-- ═══ 自绘标题栏（仅 borderless 皮肤显：dream 类。透明底让 aurora/渐变透出 → 沉浸无边框） ═══ -->
+    <Border x:Name="CustomTitleBar" DockPanel.Dock="Top"
+            Height="{Binding TitleBarHeight}" IsVisible="{Binding IsBorderless}"
+            Background="Transparent"
+            PointerPressed="OnTitleBarPressed" DoubleTapped="OnTitleBarDoubleTapped">
+      <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Stretch">
+        <!-- ═══ 左上：mac 交通灯（红黄绿三圆点，仅 macOS 显；Windows/Linux 用右侧三键）════
+             圆点内符号（×/－/⤢）hover 才显——显隐由 SharedTheme 的 `Button.mac-tl Path` /
+             `:pointerover Path` 选择器驱动（XAML 不写局部 IsVisible，否则局部值优先于 hover 样式）。 -->
+        <StackPanel x:Name="MacTrafficLights" Grid.Column="0" Orientation="Horizontal"
+                    VerticalAlignment="Center" Margin="14,0,0,0" Spacing="8">
+          <Button Classes="mac-tl mac-tl-close" Click="OnClose" ToolTip.Tip="关闭"
+                  Width="12" Height="12" Padding="0">
+            <Path x:Name="CloseGlyph" Data="{x:Static wb:Codicons.ChromeClose}" Stretch="Uniform"
+                  Width="8" Height="8"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Button>
+          <Button Classes="mac-tl mac-tl-min" Click="OnMinimize" ToolTip.Tip="最小化"
+                  Width="12" Height="12" Padding="0">
+            <Path x:Name="MinGlyph" Data="{x:Static wb:Codicons.ChromeMinimize}" Stretch="Uniform"
+                  Width="8" Height="8"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Button>
+          <Button Classes="mac-tl mac-tl-max" Click="OnMaximizeRestore" ToolTip.Tip="最大化/还原"
+                  Width="12" Height="12" Padding="0">
+            <Path x:Name="MaxGlyph" Data="{x:Static wb:Codicons.ChromeMaximize}" Stretch="Uniform"
+                  Width="8" Height="8"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Button>
+        </StackPanel>
+
+        <!-- 标题（轻量、不抢戏；IsHitTestVisible=False 让拖拽穿透到 Border） -->
+        <TextBlock Grid.Column="1" Text="Aether Workbench" Margin="0,0,0,0"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"
+                   FontFamily="{DynamicResource UiFont}" FontSize="12"
+                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+        <!-- ═══ 右上：Windows 三键（仅非 macOS 显；macOS 用左上交通灯）════ -->
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="2">
+          <StackPanel x:Name="WinButtons" Orientation="Horizontal">
+          <Button Classes="win-btn" Click="OnMinimize" ToolTip.Tip="最小化">
+            <Path Data="{x:Static wb:Codicons.ChromeMinimize}" Stretch="Uniform" Width="12" Height="12"
+                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Button>
+          <Button x:Name="MaxBtn" Classes="win-btn" Click="OnMaximizeRestore" ToolTip.Tip="最大化/还原">
+            <!-- 最大化/还原图标按最大化态切（ChromeMaximize / ChromeRestore）；两者叠放、IsVisible 互斥 -->
+            <Panel>
+              <Path x:Name="MaxIcon" Data="{x:Static wb:Codicons.ChromeMaximize}" Stretch="Uniform" Width="12" Height="12"
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Path x:Name="RestoreIcon" Data="{x:Static wb:Codicons.ChromeRestore}" Stretch="Uniform" Width="12" Height="12"
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False"/>
+            </Panel>
+          </Button>
+          <Button Classes="win-btn win-close" Click="OnClose" ToolTip.Tip="关闭">
+            <Path Data="{x:Static wb:Codicons.ChromeClose}" Stretch="Uniform" Width="12" Height="12"
+                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Button>
+          </StackPanel>  <!-- /WinButtons -->
+        </StackPanel>  <!-- /右上三键 -->
+      </Grid>
+    </Border>
+
+    <!-- ═══ 侧边栏（紧凑竖排 rail：图标上/常显标签下——标签常显免猜图标；
+         分组首项上方加间距（Classes.gap ← StartsGroup）；矮窗口放不下时 rail 滚动） ═══ -->
+    <Border DockPanel.Dock="Left" Classes="sidebar-rail"
+            Background="{DynamicResource SidebarBgBrush}"
+            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="*,Auto">
+        <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
+          <ItemsControl ItemsSource="{Binding WorkbenchNavItems}" Margin="0,8,0,4">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <!-- 选中态：IsEnabled=!IsCurrent → nav-rail:disabled accent 胶囊 -->
+                <Button Classes="nav-rail" Classes.gap="{Binding StartsGroup}"
+                        Command="{Binding Command}" CommandParameter="{Binding Key}"
+                        IsEnabled="{Binding !IsCurrent}"
+                        ToolTip.Tip="{Binding Title}">
+                  <StackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Center">
+                    <Path Data="{Binding Icon}" Stretch="Uniform" Width="18" Height="18"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    <TextBlock Text="{Binding Title}" FontSize="12" TextTrimming="CharacterEllipsis"
+                               HorizontalAlignment="Center"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <!-- rail 底部：设置按钮（主题菜单 + 重置布局——引擎自带的两项宿主功能） -->
+        <Button Grid.Row="1" Classes="account-rail" ToolTip.Tip="设置">
+          <Button.Flyout>
+            <MenuFlyout Placement="Top">
+              <MenuItem Header="主题" ItemsSource="{Binding Themes}" Click="OnSelectTheme">
+                <MenuItem.Icon><Path Data="{x:Static wb:Codicons.ColorMode}" Stretch="Uniform" Width="14" Height="14" Fill="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/></MenuItem.Icon>
+                <MenuItem.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <Path Data="{x:Static wb:Codicons.Check}" Stretch="Uniform" Width="12" Height="12"
+                            Fill="{DynamicResource AccentBrush}"
+                            IsVisible="{Binding IsCurrent}" VerticalAlignment="Center"/>
+                      <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </MenuItem.ItemTemplate>
+              </MenuItem>
+              <MenuItem Header="重置布局" Command="{Binding ResetLayoutCommand}">
+                <MenuItem.Icon><Path Data="{x:Static wb:Codicons.Refresh}" Stretch="Uniform" Width="14" Height="14" Fill="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/></MenuItem.Icon>
+              </MenuItem>
+            </MenuFlyout>
+          </Button.Flyout>
+          <Border Width="32" Height="32" CornerRadius="{DynamicResource CornerRadiusLg}"
+                  Background="{DynamicResource CardBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+            <Path Data="{x:Static wb:Codicons.SettingsGear}" Stretch="Uniform" Width="16" Height="16"
+                  Fill="{DynamicResource TextSecondaryBrush}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- ═══ 工作台主区（Workspace 决定布局，非 Window） ═══ -->
+    <!-- 加载占位：窗口首帧 Show 到 ActivateAsync 之间有短暂空窗，占位避免裸露空白（HasActiveWorkspace=false 时显） -->
+    <Panel>
+      <ContentControl Content="{Binding ActiveWorkspace}"
+                      HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                      Background="{DynamicResource ContentBgBrush}"
+                      IsVisible="{Binding HasActiveWorkspace}"/>
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                  IsVisible="{Binding !HasActiveWorkspace}">
+        <TextBlock Text="加载中…" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Panel>
+    </DockPanel>
+  </Grid>
+</Window>
