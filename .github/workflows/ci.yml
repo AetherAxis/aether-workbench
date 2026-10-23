@@ -22,17 +22,14 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      # GitHub Packages 私有源凭据（GITHUB_TOKEN 只写进 CI 运行时文件，不入库）。
-      - name: Configure GitHub Packages credentials
-        run: >
-          dotnet nuget update source github
-          --configfile aether-workbench/nuget.config
-          --username AetherAxis
-          --password ${{ secrets.GITHUB_TOKEN }}
-          --store-password-in-clear-text
-
-      # 无测试项目（多 App 布局引擎——验收靠 Desktop 等消费者实跑）；
-      # CI 只钉 Release 构建，不伪造测试通过状态。
+      # 不配 GitHub Packages 凭据：本仓零兄弟仓依赖、无 Aether.*/Ctp.* 包从该源拉取。
       - name: Build
         run: dotnet build aether-workbench.slnx -c Release
+        working-directory: aether-workbench
+
+      # 纯逻辑面（无窗口、无 UI 线程）：布局树多态往返 + 布局档版本信封（新档/旧裸档/未来版本/坏档）
+      # + 主题 JSON 解析与内置清单 + 视图注册表 + 区域管理器两条硬规则（Register 不碰 Content、
+      # key 未注册不改内容）。真实渲染（WorkspaceView 建面板/GridSplitter/换肤）仍靠 Desktop 实跑验收。
+      - name: Test
+        run: dotnet test aether-workbench.slnx -c Release --no-build
         working-directory: aether-workbench

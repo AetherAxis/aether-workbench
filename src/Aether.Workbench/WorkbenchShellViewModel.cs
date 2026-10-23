@@ -316,8 +316,8 @@ public partial class WorkbenchShellViewModel : ObservableObject, IThemeHost
         {
             var json = await _preferences.GetAsync(LayoutPrefKey);
             if (string.IsNullOrWhiteSpace(json)) return def;
-            var layout = JsonSerializer.Deserialize<LayoutNode>(json);
-            if (layout is null || !CoversSameRegions(layout, def.Layout)) return def; // 结构变 → 回退
+            var layout = LayoutArchiveSerializer.TryDeserialize(json);   // 信封/旧裸档/版本过新都走这里
+            if (layout is null || !CoversSameRegions(layout, def.Layout)) return def; // 坏档/未来版本/结构变 → 回退
             return def with { Layout = layout };
         }
         catch

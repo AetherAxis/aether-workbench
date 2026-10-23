@@ -20,7 +20,7 @@
 | `IconLoader.cs` | 常用 panel key → codicon 解析目录 |
 | `IPreferencesStore.cs` | 持久化抽象（布局/主题/窗口尺寸）——**App 提供实现**（如 JSON 文件存储） |
 
-依赖闭包 = 仅 UI 平台包（Avalonia 12.1.1 / Themes.Fluent / CommunityToolkit.Mvvm / IconPacks.Codicons / MS DI）+ BCL。**零业务类型、零 AetherAxis 仓依赖**（依赖 DAG 最底层）。
+依赖闭包 = 仅 UI 平台包（Avalonia 12.1.4 / Themes.Fluent / CommunityToolkit.Mvvm / IconPacks.Codicons / MS DI）+ BCL。**零业务类型、零 AetherAxis 仓依赖**（依赖 DAG 最底层）。
 
 ## App 接入（四步）
 
@@ -79,4 +79,15 @@ chat/documents/sourcecontrol 等 PanelKeys 与 WorkbenchViewRegistry 业务注�
 
 2026-09 建于 Aether monorepo（`apps/Desktop/Acme.Desktop.Workbench`——Workbench shell + JSON 主题系统）；
 2026-10-20 切出引擎核独立成仓（更名 `Aether.Workbench`，按上述剥离清单去 App 血统）。
-第一个消费者：`aether-desktop`（期货/回测/钱包轻量桌面端）。完整决策记录见工作区根 `MIGRATION.md`。
+第一个消费者：`aether-desktop`（连接器/交易/策略/钱包轻量桌面端）。完整决策记录见工作区根 `MIGRATION.md`。
+
+## 构建与测试
+
+```bash
+dotnet build aether-workbench.slnx    # 引擎库
+dotnet test  aether-workbench.slnx    # tests/Aether.Workbench.Tests：38 例纯逻辑面
+```
+
+测试范围：布局树多态 JSON 往返与 `FindFirstTabbed`、布局档版本信封（新档/旧裸档/未来版本/坏档）、
+主题 JSON 解析与内置清单、`ViewRegistry`、`RegionManager`（`RegisterRegion` 不碰 `Content`、
+view-key 未注册不改内容）。真实渲染（建面板 / GridSplitter / 换肤）靠 Desktop 实跑验收。

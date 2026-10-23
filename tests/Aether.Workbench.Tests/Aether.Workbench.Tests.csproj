@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 引擎自身：布局树/主题 JSON/视图与区域注册是**纯逻辑面**（不建窗口、不起 UI 线程）——
+         所以能够在无头环境测试；需要真实渲染的部分（WorkspaceView 构建）仍由 Desktop 实跑验收。 -->
+    <ProjectReference Include="..\..\src\Aether.Workbench\Aether.Workbench.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+</Project>

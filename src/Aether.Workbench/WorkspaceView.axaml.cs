@@ -307,7 +307,7 @@ public partial class WorkspaceView : UserControl
         if (layout is null) return;
         var store = WorkbenchServices.GetService<IPreferencesStore>();
         if (store is null) return;
-        var json = JsonSerializer.Serialize(layout, typeof(LayoutNode));
+        var json = LayoutArchiveSerializer.Serialize(layout);   // 带版本信封（旧裸档仍可读，见 LayoutArchiveSerializer）
         try { Task.Run(async () => await store.SetAsync(LayoutPrefKey, json)).Wait(); }
         catch { /* 持久化失败不阻断关闭 */ }
     }

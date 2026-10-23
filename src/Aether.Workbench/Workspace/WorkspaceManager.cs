@@ -31,7 +31,11 @@ public sealed class WorkspaceManager : IWorkspaceManager
                 _viewRegistry.CreateViewModel(d.Key), d.Group))
             .ToList();
 
-        var selectedIndex = LayoutNode.FindFirstTabbed(definition.Layout)?.SelectedIndex ?? 0;
+        // 坏档里的越界 tab 索引夹回合法区间（否则渲染期取 tab 项会越界）
+        var tabbed = LayoutNode.FindFirstTabbed(definition.Layout);
+        var selectedIndex = tabbed is null
+            ? 0
+            : LayoutArchiveSerializer.ClampSelectedIndex(tabbed.SelectedIndex, tabbed.RegionIds.Count);
         var ws = new WorkspaceViewModel(definition.Id, definition.Title, panels, definition.Layout, selectedIndex);
         await ws.InitializeAsync(ct);
 

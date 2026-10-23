@@ -1,10 +1,19 @@
 <Project>
   <!-- 引擎零业务依赖纪律：仅 UI 平台包（Avalonia/图标/富文本）+ MVVM 工具 + DI。出现业务包即违规。 -->
   <ItemGroup>
-    <PackageVersion Include="Avalonia" Version="12.1.1" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.1" />
+    <PackageVersion Include="Avalonia" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.4" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
     <PackageVersion Include="IconPacks.Avalonia.Codicons" Version="2.0.0" />
+  </ItemGroup>
+
+  <!-- 测试（tests/Aether.Workbench.Tests——布局树/主题 JSON/注册表这些纯逻辑面）。
+       版本与工作区其它仓一致。 -->
+  <ItemGroup>
+    <PackageVersion Include="coverlet.collector" Version="10.1.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
 </Project>
