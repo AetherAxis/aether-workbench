@@ -16,8 +16,11 @@ public sealed record PanelDescriptor(string RegionId, string Key, string Title, 
 /// <param name="Title">工作台标题。</param>
 /// <param name="Panels">所有 panel 声明。</param>
 /// <param name="Layout">布局树根。</param>
+/// <param name="FooterPanelKey">可选：rail 底部齿轮直达的 panel Key（如设置页）。
+/// 配了 → 该 panel 不进 nav rail（改由底部入口进入）；未配 → 底部齿轮保持引擎自带 flyout（主题/重置布局）。</param>
 public sealed record WorkspaceDefinition(
     string Id,
     string Title,
     IReadOnlyList<PanelDescriptor> Panels,
-    LayoutNode Layout);
+    LayoutNode Layout,
+    string? FooterPanelKey = null);

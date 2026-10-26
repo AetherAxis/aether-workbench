@@ -58,7 +58,24 @@ public partial class WorkbenchShellViewModel : ObservableObject, IThemeHost
     /// 首帧窗口 Show 到 ActivateAsync 之间有个短暂空窗，用占位避免裸露空白。</summary>
     public bool HasActiveWorkspace => ActiveWorkspace is not null;
 
-    partial void OnActiveWorkspaceChanged(IWorkspace? value) => OnPropertyChanged(nameof(HasActiveWorkspace));
+    /// <summary>rail 底部入口是否直达某个 panel（工作台配了 <see cref="IWorkspace.FooterPanelKey"/>）。
+    /// true → 底部齿轮切该 panel、且该 panel 不进 nav rail；false → 底部齿轮走引擎自带 flyout。</summary>
+    public bool HasFooterPanel => ActiveWorkspace?.FooterPanelKey is { Length: > 0 };
+
+    /// <summary>rail 底部入口的 tooltip（= 目标 panel 标题；未配时给「设置」）。</summary>
+    public string FooterPanelTitle
+        => ActiveWorkspace?.Panels.FirstOrDefault(p => p.Key == ActiveWorkspace.FooterPanelKey)?.Title ?? "设置";
+
+    /// <summary>底部入口的目标 panel 是否当前选中（与 nav 项 <see cref="NavItem.IsCurrent"/> 同义，供底部入口高亮）。</summary>
+    [ObservableProperty]
+    private bool _isFooterCurrent;
+
+    partial void OnActiveWorkspaceChanged(IWorkspace? value)
+    {
+        OnPropertyChanged(nameof(HasActiveWorkspace));
+        OnPropertyChanged(nameof(HasFooterPanel));
+        OnPropertyChanged(nameof(FooterPanelTitle));
+    }
 
     /// <summary>可选主题列表（内置 light/dark/dream 系 + &lt;themesDirectory&gt;/*.json）。两 UI 绑此。</summary>
     public ObservableCollection<ThemeOption> Themes { get; } = new();
@@ -137,6 +154,8 @@ public partial class WorkbenchShellViewModel : ObservableObject, IThemeHost
         {
             var panel = ws.Panels.FirstOrDefault(p => p.RegionId == rid);
             if (panel is null) continue;
+            // 底部入口面板（如设置）只经 rail 底部齿轮进入，不占 nav rail 项。
+            if (panel.Key == ws.FooterPanelKey) continue;
             // panel.Icon 是 codicon kind key；IconLoader 解析，未命中回退原串（当作直接 path data）。
             var icon = IconLoader.GetPathData(panel.Icon) ?? panel.Icon;
             WorkbenchNavItems.Add(new NavItem
@@ -171,6 +190,14 @@ public partial class WorkbenchShellViewModel : ObservableObject, IThemeHost
         UpdateNavCurrent();
     }
 
+    /// <summary>rail 底部入口：切到 <see cref="IWorkspace.FooterPanelKey"/> 指向的 panel（未配时无操作）。</summary>
+    [RelayCommand]
+    private void OpenFooterPanel()
+    {
+        if (ActiveWorkspace?.FooterPanelKey is { Length: > 0 } key)
+            SwitchContent(key);
+    }
+
     private void UpdateNavCurrent()
     {
         var idx = ActiveWorkspace?.SelectedTabIndex ?? 0;
@@ -183,6 +210,7 @@ public partial class WorkbenchShellViewModel : ObservableObject, IThemeHost
         }
         foreach (var item in WorkbenchNavItems)
             item.IsCurrent = item.Key == currentKey;
+        IsFooterCurrent = HasFooterPanel && ActiveWorkspace!.FooterPanelKey == currentKey;
     }
 
     /// <summary>启动期：恢复主题 + 恢复持久化布局（用户拖动后的 GridSplitter 位置 + tab 选择）后激活工作台。

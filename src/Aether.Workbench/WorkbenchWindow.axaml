@@ -132,8 +132,24 @@
           </ItemsControl>
         </ScrollViewer>
 
-        <!-- rail 底部：设置按钮（主题菜单 + 重置布局——引擎自带的两项宿主功能） -->
-        <Button Grid.Row="1" Classes="account-rail" ToolTip.Tip="设置">
+        <!-- ═══ rail 底部入口（两形态互斥）═══
+             ① 工作台配了 FooterPanelKey（如 ⑮ 的设置页）→ 齿轮直开该 panel，无菜单：
+                主题/重置布局等宿主功能已并入该 panel 自身；current = 该 panel 正在显示。
+             ② 未配 → 引擎自带 flyout（主题菜单 + 重置布局），保持既有宿主行为。 -->
+        <Panel Grid.Row="1">
+        <Button Classes="account-rail" Classes.current="{Binding IsFooterCurrent}"
+                ToolTip.Tip="{Binding FooterPanelTitle}"
+                Command="{Binding OpenFooterPanelCommand}"
+                IsVisible="{Binding HasFooterPanel}">
+          <Border Width="32" Height="32" CornerRadius="{DynamicResource CornerRadiusLg}"
+                  Background="{DynamicResource CardBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+            <Path Data="{x:Static wb:Codicons.SettingsGear}" Stretch="Uniform" Width="16" Height="16"
+                  Fill="{DynamicResource TextSecondaryBrush}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+        </Button>
+
+        <Button Classes="account-rail" ToolTip.Tip="设置" IsVisible="{Binding !HasFooterPanel}">
           <Button.Flyout>
             <MenuFlyout Placement="Top">
               <MenuItem Header="主题" ItemsSource="{Binding Themes}" Click="OnSelectTheme">
@@ -161,6 +177,7 @@
                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
           </Border>
         </Button>
+        </Panel>
       </Grid>
     </Border>
 

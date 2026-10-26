@@ -212,6 +212,12 @@
   <Style Selector="Button.account-rail:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
   </Style>
+  <!-- 底部入口当前态（FooterPanelKey 指向的 panel 正在显示）——与 nav-rail 选中态的强调语义一致：
+       底色提亮 + accent 描边（不做整块 accent 填充，齿轮图标保持次级色，免成视觉主角）。 -->
+  <Style Selector="Button.account-rail.current Border">
+    <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+  </Style>
 
   <!-- 侧边栏 rail：恒定 72px 竖排图标+标签（QWork/飞书式——无展开/收起，标签常显；矮窗口 rail 内滚）。
        宽度按「最长标签 4 汉字 × 12px = 48px + 项 margin 12px + 两侧余量」收——标签一律 ≤4 汉字（租户 Workspace.cs Title）。

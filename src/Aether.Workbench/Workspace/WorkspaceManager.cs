@@ -36,7 +36,8 @@ public sealed class WorkspaceManager : IWorkspaceManager
         var selectedIndex = tabbed is null
             ? 0
             : LayoutArchiveSerializer.ClampSelectedIndex(tabbed.SelectedIndex, tabbed.RegionIds.Count);
-        var ws = new WorkspaceViewModel(definition.Id, definition.Title, panels, definition.Layout, selectedIndex);
+        var ws = new WorkspaceViewModel(definition.Id, definition.Title, panels, definition.Layout, selectedIndex,
+            definition.FooterPanelKey);
         await ws.InitializeAsync(ct);
 
         Active = ws;
