@@ -79,7 +79,7 @@ chat/documents/sourcecontrol 等 PanelKeys 与 WorkbenchViewRegistry 业务注�
 
 2026-09 建于 Aether monorepo（`apps/Desktop/Acme.Desktop.Workbench`——Workbench shell + JSON 主题系统）；
 2026-10-20 切出引擎核独立成仓（更名 `Aether.Workbench`，按上述剥离清单去 App 血统）。
-第一个消费者：`aether-desktop`（连接器/交易/策略/钱包轻量桌面端）。完整决策记录见工作区根 `MIGRATION.md`。
+第一个消费者：`aether-ctp-desktop`（连接器/交易/策略/钱包轻量桌面端；2026-10-28 由 `aether-desktop` 改名）。完整决策记录见工作区根 `MIGRATION.md`。
 
 ## 构建与测试
 
