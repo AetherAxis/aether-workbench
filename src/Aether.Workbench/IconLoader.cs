@@ -34,6 +34,7 @@ public static class IconLoader
         ["knowledge"] = PackIconCodiconsKind.Collection,
         ["settings"] = PackIconCodiconsKind.SettingsGear,
         ["workflow"] = PackIconCodiconsKind.Rocket,
+        ["browser"] = PackIconCodiconsKind.Globe,   // ⑮ 浏览器网络面板（Playwright headed 会话的观测视图）
     };
 
     /// <summary>菜单/收起按钮的 codicon 三横线 path data（委托 Shared.Codicons，XAML <c>{x:Static}</c> 引用）。</summary>
